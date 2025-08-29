@@ -6,8 +6,7 @@ from pytest_django.asserts import assertRedirects, assertFormError
 from django.urls import reverse
 
 from news.forms import BAD_WORDS, WARNING
-from news.models import Comment, News
-
+from news.models import Comment
 
 
 @pytest.mark.django_db
@@ -43,7 +42,7 @@ def test_user_cant_use_bad_words(not_author_client, news):
     assert Comment.objects.count() == 0
 
 
-def test_author_can_delete_comment(author_client, news):
+def test_author_can_delete_comment(author_client, news, comment):
     url = reverse('news:delete', args=(news.id,))
     delete_url = reverse('news:detail', args=(news.id,))
     response = author_client.post(url)
@@ -52,7 +51,11 @@ def test_author_can_delete_comment(author_client, news):
     assert Comment.objects.count() == 0
 
 
-def test_user_cant_delete_comment_of_another_user(not_author_client, news):
+def test_user_cant_delete_comment_of_another_user(
+        not_author_client,
+        news,
+        comment
+):
     url = reverse('news:delete', args=(news.id,))
     response = not_author_client.post(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
